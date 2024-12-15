@@ -10,3 +10,5 @@ Thumbs.db
 
 # Private files
 production/
+Old.Dockerfile
+files/
