@@ -1,55 +1,43 @@
-# Stage 1: Build Tor from source
-FROM debian:bullseye AS builder
+FROM debian:bookworm AS builder
 
-ARG GPGKEY=A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE="True"
-ARG DEBCONF_NOWARNINGS="yes"
-ARG DEBIAN_FRONTEND=noninteractive
-ARG TOR_VERSION=0.4.9.1-alpha  # Specify the desired Tor version
+# Install required packages
+RUN apt-get update && apt-get install -y \
+       wget tar gzip build-essential libevent-dev libssl-dev zlib1g zlib1g-dev pwgen iputils-ping nano neofetch tor-geoipdb obfs4proxy
 
-ENV TOR_TARBALL_NAME tor-$TOR_VERSION.tar.gz
-ENV TOR_TARBALL_LINK https://dist.torproject.org/$TOR_TARBALL_NAME
-ENV TOR_TARBALL_ASC $TOR_TARBALL_NAME.asc
+# Download and extract Tor source code
+WORKDIR /tmp
+RUN wget --no-check-certificate https://dist.torproject.org/tor-0.4.8.9.tar.gz
+RUN tar -xzf tor-0.4.8.9.tar.gz
 
-RUN echo 'deb http://http.us.debian.org/debian bullseye-backports main' > /etc/apt/sources.list.d/backports.list
-RUN echo 'deb http://deb.debian.org/debian bullseye-backports-sloppy main' > /etc/apt/sources.list.d/backports.list
-
-RUN apt-get update -y
-RUN apt-get install -y wget make gcc libevent-dev libssl-dev gnupg zlib1g-dev
-
-RUN wget -qO- $TOR_TARBALL_LINK | tar -xzf -
-RUN wget -qO- $TOR_TARBALL_ASC | gpg --keyserver keys.openpgp.org --recv-keys 0x$GPGKEY
-RUN gpg --verify $TOR_TARBALL_NAME.asc $TOR_TARBALL_NAME
-
-RUN cd tor-$TOR_VERSION
-RUN ./configure
+# Build Tor
+WORKDIR /tmp/tor-0.4.8.9
+RUN ./configure --prefix=/usr/local
 RUN make -j $(nproc)
 RUN make install
 
 # Stage 2: Final image
-FROM debian:bullseye
+FROM debian:bookworm
 
-RUN apt-get update -y
-RUN apt-get install -y --no-install-recommends pwgen iputils-ping nano neofetch tor-geoipdb
-RUN apt-get update
-RUN apt-get install -y obfs4proxy
+# Install dependencies
+RUN apt-get update && apt-get upgrade -y
 
+
+# Copy Tor binaries and configuration
 COPY --from=builder /usr/local/bin/tor /usr/local/bin/
-COPY --from=builder /usr/local/sbin/tor /usr/local/sbin/
+#COPY --from=builder /usr/local/sbin/tor /usr/local/sbin/
 COPY --from=builder /usr/local/share/tor /usr/local/share/tor
 COPY --from=builder /usr/local/etc/tor /usr/local/etc/tor
 
 # Copy Tor configuration file
 COPY ./torrc /etc/tor/torrc
 
-# Copy docker-entrypoint
-COPY ./scripts/ /usr/local/bin/
+# Copy docker-entrypoint script
+COPY ./scripts/docker-entrypoint.sh /usr/local/bin/
 
-# Persist data
-VOLUME /etc/tor /var/lib/tor
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-# ORPort, DirPort, SocksPort, ObfsproxyPort, MeekPort
+# Expose ports
 EXPOSE 9001 9030 9050 54444 7002
 
-ENTRYPOINT ["docker-entrypoint"]
 CMD ["tor", "-f", "/etc/tor/torrc"]
