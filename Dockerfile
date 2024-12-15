@@ -4,6 +4,8 @@ FROM debian:bookworm AS builder
 RUN apt-get update && apt-get install -y \
        wget tar gzip build-essential libevent-dev libssl-dev zlib1g zlib1g-dev pwgen iputils-ping nano neofetch tor-geoipdb obfs4proxy
 
+RUN apt-get install -y libglu1-mesa-dev libx11-dev libxext-dev
+
 # Download and extract Tor source code
 WORKDIR /tmp
 RUN wget --no-check-certificate https://dist.torproject.org/tor-0.4.8.9.tar.gz
@@ -20,6 +22,11 @@ FROM debian:bookworm
 
 # Install dependencies
 RUN apt-get update && apt-get upgrade -y
+
+# Set a default Nickname
+ENV TOR_NICKNAME=Tor4
+ENV TOR_USER=tord
+ENV TERM=xterm
 
 
 # Copy Tor binaries and configuration

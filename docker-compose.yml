@@ -1,5 +1,5 @@
 relay:
-  image: joshgaby/tor-server
+  image: drumtechphoto/tor-server:latest
   init: true
   restart: always
   network_mode: host
@@ -9,7 +9,7 @@ relay:
     #- "9030:9030"
     #- "54444:54444"
     #- "7002:7002"
-  #volumes:
+    #volumes:
     ## mount and DataDirectory and custom `torrc` here
     #- ./tor-data/:/var/lib/tor/
     #- ./torrc:/etc/tor/torrc
