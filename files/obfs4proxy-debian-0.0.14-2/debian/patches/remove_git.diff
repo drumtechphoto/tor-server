@@ -1,0 +1,211 @@
+Description: Remove .git suffix from imports
+ The package install path does not include the .git suffix,
+ and so to preserve imports this needs to be removed. 
+Author: Ana Custura <ana@netstat.org.uk>
+Forwarded: https://gitlab.com/yawning/obfs4/-/commit/19f5a37fe427b40b2d201ad2d1b4be8b8b1a3094
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/common/ntor/ntor_test.go
++++ b/common/ntor/ntor_test.go
+@@ -33,7 +33,7 @@ import (
+ 
+ 	"filippo.io/edwards25519"
+ 	"filippo.io/edwards25519/field"
+-	"gitlab.com/yawning/edwards25519-extra.git/elligator2"
++	"gitlab.com/yawning/edwards25519-extra/elligator2"
+ )
+ 
+ // TestNewKeypair tests Curve25519/Elligator keypair generation.
+--- a/internal/x25519ell2/x25519ell2.go
++++ b/internal/x25519ell2/x25519ell2.go
+@@ -23,7 +23,7 @@
+ 	"filippo.io/edwards25519"
+ 	"filippo.io/edwards25519/field"
+ 
+-	"gitlab.com/yawning/edwards25519-extra.git/elligator2"
++	"gitlab.com/yawning/edwards25519-extra/elligator2"
+ )
+ 
+ // The corrected version of this that solves the implementation errors
+diff --git a/common/socks5/args.go b/common/socks5/args.go
+index a5efb43..3b398d3 100644
+--- a/common/socks5/args.go
++++ b/common/socks5/args.go
+@@ -29,7 +29,7 @@ package socks5
+ 
+ import (
+ 	"fmt"
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ )
+ 
+ // parseClientParameters takes a client parameter string formatted according to
+diff --git a/common/socks5/args_test.go b/common/socks5/args_test.go
+index d9d3f22..8683e8c 100644
+--- a/common/socks5/args_test.go
++++ b/common/socks5/args_test.go
+@@ -5,7 +5,7 @@ package socks5
+ import (
+ 	"testing"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ )
+ 
+ func stringSlicesEqual(a, b []string) bool {
+diff --git a/common/socks5/socks5.go b/common/socks5/socks5.go
+index 7630d3d..a619256 100644
+--- a/common/socks5/socks5.go
++++ b/common/socks5/socks5.go
+@@ -46,7 +46,7 @@ import (
+ 	"syscall"
+ 	"time"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ )
+ 
+ const (
+diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
+index f295926..3fca9a0 100644
+--- a/obfs4proxy/obfs4proxy.go
++++ b/obfs4proxy/obfs4proxy.go
+@@ -41,7 +41,7 @@ import (
+ 	"sync"
+ 	"syscall"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/common/log"
+ 	"gitlab.com/yawning/obfs4.git/common/socks5"
+ 	"gitlab.com/yawning/obfs4.git/transports"
+diff --git a/obfs4proxy/pt_extras.go b/obfs4proxy/pt_extras.go
+index 18bc2df..6c2cca5 100644
+--- a/obfs4proxy/pt_extras.go
++++ b/obfs4proxy/pt_extras.go
+@@ -35,7 +35,7 @@ import (
+ 	"os"
+ 	"strconv"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ )
+ 
+ // This file contains things that probably should be in goptlib but are not
+diff --git a/transports/base/base.go b/transports/base/base.go
+index bc6e025..0c37d05 100644
+--- a/transports/base/base.go
++++ b/transports/base/base.go
+@@ -32,7 +32,7 @@ package base // import "gitlab.com/yawning/obfs4.git/transports/base"
+ import (
+ 	"net"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ )
+ 
+ type DialFunc func(string, string) (net.Conn, error)
+diff --git a/transports/meeklite/base.go b/transports/meeklite/base.go
+index e9d8ca1..0f21509 100644
+--- a/transports/meeklite/base.go
++++ b/transports/meeklite/base.go
+@@ -36,7 +36,7 @@ import (
+ 	"fmt"
+ 	"net"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/transports/base"
+ )
+ 
+diff --git a/transports/meeklite/meek.go b/transports/meeklite/meek.go
+index 17c7a67..36e8ec1 100644
+--- a/transports/meeklite/meek.go
++++ b/transports/meeklite/meek.go
+@@ -44,7 +44,7 @@ import (
+ 	"sync"
+ 	"time"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/transports/base"
+ )
+ 
+diff --git a/transports/obfs2/obfs2.go b/transports/obfs2/obfs2.go
+index 531bcd4..cc07a37 100644
+--- a/transports/obfs2/obfs2.go
++++ b/transports/obfs2/obfs2.go
+@@ -40,7 +40,7 @@ import (
+ 	"net"
+ 	"time"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/common/csrand"
+ 	"gitlab.com/yawning/obfs4.git/transports/base"
+ )
+diff --git a/transports/obfs3/obfs3.go b/transports/obfs3/obfs3.go
+index 42bdd90..aed5b09 100644
+--- a/transports/obfs3/obfs3.go
++++ b/transports/obfs3/obfs3.go
+@@ -40,7 +40,7 @@ import (
+ 	"net"
+ 	"time"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/common/csrand"
+ 	"gitlab.com/yawning/obfs4.git/common/uniformdh"
+ 	"gitlab.com/yawning/obfs4.git/transports/base"
+diff --git a/transports/obfs4/obfs4.go b/transports/obfs4/obfs4.go
+index 9723735..7503a9b 100644
+--- a/transports/obfs4/obfs4.go
++++ b/transports/obfs4/obfs4.go
+@@ -42,7 +42,7 @@ import (
+ 	"syscall"
+ 	"time"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/common/drbg"
+ 	"gitlab.com/yawning/obfs4.git/common/ntor"
+ 	"gitlab.com/yawning/obfs4.git/common/probdist"
+diff --git a/transports/obfs4/statefile.go b/transports/obfs4/statefile.go
+index cbf1d6e..8ebab9a 100644
+--- a/transports/obfs4/statefile.go
++++ b/transports/obfs4/statefile.go
+@@ -37,7 +37,7 @@ import (
+ 	"strconv"
+ 	"strings"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/common/csrand"
+ 	"gitlab.com/yawning/obfs4.git/common/drbg"
+ 	"gitlab.com/yawning/obfs4.git/common/ntor"
+diff --git a/transports/scramblesuit/base.go b/transports/scramblesuit/base.go
+index 655ad7a..0462452 100644
+--- a/transports/scramblesuit/base.go
++++ b/transports/scramblesuit/base.go
+@@ -33,7 +33,7 @@ import (
+ 	"fmt"
+ 	"net"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/transports/base"
+ )
+ 
+diff --git a/transports/scramblesuit/conn.go b/transports/scramblesuit/conn.go
+index cc18e18..22a79ab 100644
+--- a/transports/scramblesuit/conn.go
++++ b/transports/scramblesuit/conn.go
+@@ -42,7 +42,7 @@ import (
+ 	"net"
+ 	"time"
+ 
+-	"git.torproject.org/pluggable-transports/goptlib.git"
++	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+ 	"gitlab.com/yawning/obfs4.git/common/csrand"
+ 	"gitlab.com/yawning/obfs4.git/common/drbg"
+ 	"gitlab.com/yawning/obfs4.git/common/probdist"

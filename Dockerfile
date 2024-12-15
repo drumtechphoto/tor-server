@@ -1,73 +1,43 @@
-# Dockerfile for Tor Relay Server with obfs4proxy
-FROM debian:bullseye
-RUN echo 'deb http://deb.debian.org/debian bullseye-backports main' > /etc/apt/sources.list.d/backports.list
-#MAINTAINER Kevan kevdude18@gmail.com
+# Stage 1: Build Tor from source
+FROM debian:bullseye AS builder
 
 ARG GPGKEY=A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE="True"
 ARG DEBCONF_NOWARNINGS="yes"
 ARG DEBIAN_FRONTEND=noninteractive
-ARG found=""
+ARG TOR_VERSION=0.4.9.1-alpha  # Specify the desired Tor version
 
-# Set a default Nickname
-ENV TOR_NICKNAME=Tor4
-ENV TOR_USER=tord
-ENV TERM=xterm
+ENV TOR_TARBALL_NAME tor-$TOR_VERSION.tar.gz
+ENV TOR_TARBALL_LINK https://dist.torproject.org/$TOR_TARBALL_NAME
+ENV TOR_TARBALL_ASC $TOR_TARBALL_NAME.asc
 
-ENV TOR_VERSION $TOR_VERSION
-ENV TOR_TARBALL_NAME tor-\$TOR_VERSION.tar.gz
-ENV TOR_TARBALL_LINK https://dist.torproject.org/\$TOR_TARBALL_NAME
-ENV TOR_TARBALL_ASC \$TOR_TARBALL_NAME.asc
+RUN echo 'deb http://http.us.debian.org/debian bullseye-backports main' > /etc/apt/sources.list.d/backports.list
+RUN echo 'deb http://deb.debian.org/debian bullseye-backports-sloppy main' > /etc/apt/sources.list.d/backports.list
 
-RUN \\
-       apt-get update \\
-       && apt-get -y upgrade \\
-       && apt-get -y install \\
-       wget \\
-       make \\
-       gcc \\
-       libevent-dev \\
-       libssl-dev \\
-       gnupg \\
-       zlib1g-dev \\
-       && apt-get clean
+RUN apt-get update -y
+RUN apt-get install -y wget make gcc libevent-dev libssl-dev gnupg zlib1g-dev
 
-RUN \\
-       wget \$TOR_TARBALL_LINK \\
-       && wget \$TOR_TARBALL_LINK.asc \\
-       && gpg --keyserver keys.openpgp.org --recv-keys 7A02B3521DC75C542BA015456AFEE6D49E92B601 \\
-       && gpg --verify \$TOR_TARBALL_NAME.asc \\
-       && tar xvf \$TOR_TARBALL_NAME \\
-       && cd tor-\$TOR_VERSION \\
-       && ./configure \\
-       && make \\
-       && make install \\
-       && cd .. \\
-       && rm -r tor-\$TOR_VERSION \\
-       && rm \$TOR_TARBALL_NAME \\
-       && rm \$TOR_TARBALL_NAME.asc
+RUN wget -qO- $TOR_TARBALL_LINK | tar -xzf -
+RUN wget -qO- $TOR_TARBALL_ASC | gpg --keyserver keys.openpgp.org --recv-keys 0x$GPGKEY
+RUN gpg --verify $TOR_TARBALL_NAME.asc $TOR_TARBALL_NAME
 
-# Install tor with GeoIP and obfs4proxy & backup torrc
-RUN apt-get update \
-       && apt-get install -y --no-install-recommends \
-       apt-utils \
-       && apt-get install -y --no-install-recommends \
-       pwgen \
-       iputils-ping \
-       nano \
-       neofetch \
-       tor/bullseye-backports \
-       tor-geoipdb/bullseye-backports \
-       obfs4proxy/bullseye-backports \
-       && mkdir -pv /usr/local/etc/tor/ \
-       && mv -v /etc/tor/torrc /usr/local/etc/tor/torrc.sample \
-       && apt-get purge --auto-remove -y \
-       apt-utils \
-       && apt-get clean \
-       && rm -rf /var/lib/apt/lists/* \
-       # Rename Debian unprivileged user to tord \
-       && usermod -l ${TOR_USER} debian-tor \
-       && groupmod -n ${TOR_USER} debian-tor
+RUN cd tor-$TOR_VERSION
+RUN ./configure
+RUN make -j $(nproc)
+RUN make install
+
+# Stage 2: Final image
+FROM debian:bullseye
+
+RUN apt-get update -y
+RUN apt-get install -y --no-install-recommends pwgen iputils-ping nano neofetch tor-geoipdb
+RUN apt-get update
+RUN apt-get install -y obfs4proxy
+
+COPY --from=builder /usr/local/bin/tor /usr/local/bin/
+COPY --from=builder /usr/local/sbin/tor /usr/local/sbin/
+COPY --from=builder /usr/local/share/tor /usr/local/share/tor
+COPY --from=builder /usr/local/etc/tor /usr/local/etc/tor
 
 # Copy Tor configuration file
 COPY ./torrc /etc/tor/torrc
