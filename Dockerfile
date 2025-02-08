@@ -1,50 +1,44 @@
-FROM debian:bookworm AS builder
-
-# Install required packages
-RUN apt-get update && apt-get install -y \
-       wget tar gzip build-essential libevent-dev libssl-dev zlib1g zlib1g-dev pwgen iputils-ping nano neofetch tor-geoipdb obfs4proxy
-
-RUN apt-get install -y libglu1-mesa-dev libx11-dev libxext-dev
-
-# Download and extract Tor source code
-WORKDIR /tmp
-RUN wget --no-check-certificate https://dist.torproject.org/tor-0.4.8.9.tar.gz
-RUN tar -xzf tor-0.4.8.9.tar.gz
-
-# Build Tor
-WORKDIR /tmp/tor-0.4.8.9
-RUN ./configure --prefix=/usr/local
-RUN make -j $(nproc)
-RUN make install
-
-# Stage 2: Final image
-FROM debian:bookworm
-
-# Install dependencies
-RUN apt-get update && apt-get upgrade -y
+# Dockerfile for Tor Relay Server with obfs4proxy
+FROM debian:bookworm-slim
+USER root
+LABEL org.opencontainers.image.authors="josh.gaby@gmail.com"
 
 # Set a default Nickname
 ENV TOR_NICKNAME=Tor4
 ENV TOR_USER=tord
 ENV TERM=xterm
 
+# Install tor with GeoIP and obfs4proxy & backup torrc
+RUN apt-get update \
+    && apt-get install -y apt-transport-https wget gpg \
+    && apt-get install -y unattended-upgrades apt-listchanges
 
-# Copy Tor binaries and configuration
-COPY --from=builder /usr/local/bin/tor /usr/local/bin/
-#COPY --from=builder /usr/local/sbin/tor /usr/local/sbin/
-COPY --from=builder /usr/local/share/tor /usr/local/share/tor
-COPY --from=builder /usr/local/etc/tor /usr/local/etc/tor
+COPY tor.sources.list /etc/apt/sources.list.d/tor.list
+COPY 50unattended-upgrades /etc/apt/apt.conf.d/50unattended-upgrades
+COPY 20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
 
-# Copy Tor configuration file
-COPY ./torrc /etc/tor/torrc
+RUN wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
+RUN apt-get update
+RUN apt-get install -y tor deb.torproject.org-keyring
+RUN apt-get install -y tor-geoipdb
+# RUN apt-get install -y obfs4proxy
+RUN mkdir -pv /usr/local/etc/tor/
+RUN apt-get -y purge --auto-remove
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
 
-# Copy docker-entrypoint script
-COPY ./scripts/docker-entrypoint.sh /usr/local/bin/
+# Rename Debian unprivileged user to tord \
+RUN usermod -l ${TOR_USER} debian-tor \
+    && groupmod -n ${TOR_USER} debian-tor
 
-# Set entrypoint
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+COPY torrc /etc/tor/torrc
+COPY ./scripts/ /usr/local/bin/
 
-# Expose ports
-EXPOSE 9001 9030 9050 54444 7002
+# Persist data
+VOLUME /etc/tor /var/lib/tor
 
+# ORPort, DirPort, SocksPort, ObfsproxyPort
+EXPOSE 9001 9030 9050 54444
+
+ENTRYPOINT ["docker-entrypoint"]
 CMD ["tor", "-f", "/etc/tor/torrc"]

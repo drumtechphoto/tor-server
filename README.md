@@ -1,5 +1,5 @@
 #### Forked
-This docker was forked from [chriswayg/tor-server](https://github.com/chriswayg/tor-server) and updated to run Debian Bullseye and the latest available Tor and obfs4proxy packages.
+This docker was forked from [chriswayg/tor-server](https://github.com/chriswayg/tor-server) and updated to run Debian 12 (Bookworm) and the latest available Tor packages. Unattended-Upgrades is also configured to keep Tor up to date automatically.
 
 #### A complete, efficient and secure Tor relay server Docker image
 *This docker image will install the latest current stable version of Tor server. It will run Tor as an unprivileged regular user, as recommended by torproject.org.*
@@ -209,14 +209,6 @@ Please use the latest Docker engine available (do not use the possibly outdated 
 - [Tor Relay Guide](https://trac.torproject.org/projects/tor/wiki/TorRelayGuide)
 - [Tor on Debian Installation Instructions 2019](https://2019.www.torproject.org/docs/debian.html.en)
 - [Torproject - git repo](https://github.com/torproject/tor)
-- [obfs4proxy on Debian - Guide to run an obfuscated bridge to help censored users connect to the Tor network.](https://trac.torproject.org/projects/tor/wiki/doc/PluggableTransports/obfs4proxy)
-- [obfs4 - The obfourscator - Github](https://github.com/Yawning/obfs4)
-- [How to use the “meek” pluggable transport](https://blog.torproject.org/how-use-meek-pluggable-transport)
-- [meek-server for Tor meek bridge](https://github.com/arlolra/meek/tree/master/meek-server)
 
 ### License:
  - MIT
-
-##### For a very similar image based on tor-alpine use `chriswayg/tor-alpine`
- - https://hub.docker.com/r/chriswayg/tor-alpine
- - https://github.com/chriswayg/tor-alpine

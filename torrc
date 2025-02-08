@@ -4,19 +4,25 @@
 User tord
 DataDirectory /var/lib/tor
 
+NumCPUs 2
+
 # Server's public IP Address (usually automatic)
-#Address 10.10.10.10
+#Address 3.14.159.26
 
 # Port to advertise for incoming Tor connections.
-ORPort 9001                  # common ports are 9001, 443
+ORPort 9002                  # common ports are 9001, 443
 #ORPort [IPv6-address]:9001
 
 # Mirror directory information for others (optional, not used on bridge)
-DirPort 9030                 # common ports are 9030, 80
+DirPort 9031                 # common ports are 9030, 80
 
 # Run Tor only as a server (no local applications)
 SocksPort 0
 ControlSocket 0
+
+ControlPort 0.0.0.0:9051
+# Enable password access for control port (password is: Cpk762yM08Cr)
+HashedControlPassword 16:783A31A701B99F6D60D04559DD776DF2A6F895776BF72913BE332985E1
 
 # Run as a relay only (change policy to enable exit node)
 ExitPolicy reject *:*        # no exits allowed
